@@ -3,12 +3,17 @@
 export const CATEGORIES = [
   { id: 1, name: 'Τέντες' },
   { id: 2, name: 'Πέργκολες' },
-  { id: 3, name: 'Αντιρίδες' },
+  { id: 3, name: 'Κάθετα Συστήματα' },
   { id: 4, name: 'Αυτοματισμοί' }
 ];
 
 export const PRODUCTS = [
-  // Πέργκολες
+  // Τέντες Με Βραχίονες (Κατηγορία 1)
+  { id: 12, name: 'Τέντα Κασετίνα 530', categoryId: 1, hasConfig: true },
+  { id: 13, name: 'Τέντα Κασέτα 732', categoryId: 1, hasConfig: true },
+  { id: 16, name: 'Τέντα Epica', categoryId: 1, hasConfig: true },
+  
+  // Πέργκολες (Κατηγορία 2)
   { id: 18, name: 'Πέργκολα Pro 100', categoryId: 2, hasConfig: true },
   { id: 19, name: 'Πέργκολα Pro 150', categoryId: 2, hasConfig: true },
   { id: 20, name: 'Πέργκολα Pro Mega', categoryId: 2, hasConfig: true },
@@ -21,7 +26,13 @@ export const PRODUCTS = [
   { id: 27, name: 'Πέργκολα Open Roof', categoryId: 2, hasConfig: false },
   { id: 28, name: 'Πέργκολα Σταθερές Περσίδες', categoryId: 2, hasConfig: true },
   { id: 29, name: 'Πέργκολα Balloon', categoryId: 2, hasConfig: true },
-  { id: 30, name: 'Πέργκολα Δανάη', categoryId: 2, hasConfig: true }
+  { id: 30, name: 'Πέργκολα Δανάη', categoryId: 2, hasConfig: true },
+  
+  // Κάθετα Συστήματα (Κατηγορία 3)
+  { id: 31, name: 'Κάθετο Zip Screen', categoryId: 3, hasConfig: true },
+  { id: 32, name: 'Κάθετο Κασονέτο Συρματόσχοινα', categoryId: 3, hasConfig: true },
+  { id: 33, name: 'Κάθετο Κασονέτο Φ10', categoryId: 3, hasConfig: true },
+  { id: 36, name: 'Κάθετο ΒΤ', categoryId: 3, hasConfig: true }
 ];
 
 // Helper function: Get products by category

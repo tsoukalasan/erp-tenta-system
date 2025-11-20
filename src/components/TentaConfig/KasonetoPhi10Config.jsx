@@ -70,8 +70,9 @@ function KasonetoPhi10Config({ product, onSave }) {
     // Auto Lock +540€
     const autoLockCost = config.hasAutoLock ? 540 : 0;
 
-    // Cabrio = -(Πλάτος * 24)
-    const cabrioDiscount = config.hasCabrio ? -(config.width * 24) : 0;
+    // Cabrio (Χωρίς Κασονέτο) = -(Πλάτος σε μέτρα * 24)
+    const widthInMeters = config.width / 100;
+    const cabrioDiscount = config.hasCabrio ? -(widthInMeters * 24) : 0;
 
     const subtotal = basePrice + motorCost + autoLockCost + cabrioDiscount;
     const colorSurchargeAmount = config.customColor ? 120 : 0;
@@ -215,9 +216,9 @@ function KasonetoPhi10Config({ product, onSave }) {
                   onChange={(e) => handleChange('hasCabrio', e.target.checked)}
                   className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <label htmlFor="hasCabrio" className="text-sm text-gray-700">
-                  Cabrio (Έκπτωση: -{config.width * 24}€)
-                </label>
+              <label htmlFor="hasCabrio" className="text-sm text-gray-700">
+                Χωρίς Κασονέτο - Cabrio (Έκπτωση: -{((config.width / 100) * 24).toFixed(2)}€)
+              </label>
               </div>
             </div>
           </div>

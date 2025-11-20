@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Calculator, AlertCircle } from 'lucide-react';
+import { Calculator, AlertCircle, Wrench, ChevronDown, ChevronUp } from 'lucide-react';
 import { 
   ZIP_SCREEN_BASE_PRICES,
-  getPriceFromTable
+  ZIP_SCREEN_COMPONENTS,
+  getPriceFromTable,
+  calculateZipScreenFabricSquareMeters
 } from '../../constants/pergolaPricingTables';
 
 function ZipScreenConfig({ product, onSave }) {
@@ -11,7 +13,8 @@ function ZipScreenConfig({ product, onSave }) {
     height: 175,
     hasMotor: false,
     customColor: false,
-    customColorCode: ''
+    customColorCode: '',
+    showComponents: false
   });
 
   const [calculations, setCalculations] = useState({
@@ -21,7 +24,8 @@ function ZipScreenConfig({ product, onSave }) {
     colorSurcharge: 0,
     subtotalWithoutVAT: 0,
     vat: 0,
-    totalPrice: 0
+    totalPrice: 0,
+    components: null
   });
 
   const [errors, setErrors] = useState([]);
@@ -55,17 +59,130 @@ function ZipScreenConfig({ product, onSave }) {
       Math.abs(curr - config.height) < Math.abs(prev - config.height) ? curr : prev
     );
 
-    const basePrice = getPriceFromTable(ZIP_SCREEN_BASE_PRICES, roundedHeight, roundedWidth);
-    if (basePrice === 0) {
+    // Υπολογισμός εξαρτημάτων (αν επιλεγμένο)
+    let componentsTotal = 0;
+    let componentsList = null;
+    
+    if (config.showComponents) {
+      componentsList = [];
+      const widthInMeters = config.width / 100;
+      const heightInMeters = config.height / 100;
+      
+      // 1. Σταθερά εξαρτήματα
+      ZIP_SCREEN_COMPONENTS.fixed.forEach(item => {
+        const cost = item.price * item.quantity;
+        componentsTotal += cost;
+        componentsList.push({
+          name: item.name,
+          detail: `${item.quantity} ${item.unit} × ${item.price}€`,
+          cost
+        });
+      });
+      
+      // 2. Κασονέτο (πλάτος)
+      const cassetteMeters = Math.max(widthInMeters, ZIP_SCREEN_COMPONENTS.cassette.minMeters);
+      const cassetteCost = cassetteMeters * ZIP_SCREEN_COMPONENTS.cassette.pricePerMeter;
+      componentsTotal += cassetteCost;
+      componentsList.push({
+        name: 'Κασονέτο Τετράγωνο',
+        detail: `${cassetteMeters.toFixed(2)}μ × ${ZIP_SCREEN_COMPONENTS.cassette.pricePerMeter}€/μ (ελάχ. ${ZIP_SCREEN_COMPONENTS.cassette.minMeters}μ)`,
+        cost: cassetteCost
+      });
+      
+      // 3. Άξονας (πλάτος)
+      const axisMeters = Math.max(widthInMeters, ZIP_SCREEN_COMPONENTS.axis.minMeters);
+      const axisCost = axisMeters * ZIP_SCREEN_COMPONENTS.axis.pricePerMeter;
+      componentsTotal += axisCost;
+      componentsList.push({
+        name: ZIP_SCREEN_COMPONENTS.axis.name,
+        detail: `${axisMeters.toFixed(2)}μ × ${ZIP_SCREEN_COMPONENTS.axis.pricePerMeter}€/μ (ελάχ. ${ZIP_SCREEN_COMPONENTS.axis.minMeters}μ)`,
+        cost: axisCost
+      });
+      
+      // 4. Οδηγός ((ύψος - 11cm) × 2)
+      const guideMeters = Math.max(((config.height - 11) / 100) * 2, ZIP_SCREEN_COMPONENTS.guide.minMeters);
+      const guideCost = guideMeters * ZIP_SCREEN_COMPONENTS.guide.pricePerMeter;
+      componentsTotal += guideCost;
+      componentsList.push({
+        name: ZIP_SCREEN_COMPONENTS.guide.name,
+        detail: `${guideMeters.toFixed(2)}μ × ${ZIP_SCREEN_COMPONENTS.guide.pricePerMeter}€/μ (ύψος-11cm×2, ελάχ. ${ZIP_SCREEN_COMPONENTS.guide.minMeters}μ)`,
+        cost: guideCost
+      });
+      
+      // 5. Σκληρό Πλαστικό Ζιπ ((ύψος - 11cm) × 2)
+      const hardZipMeters = Math.max(((config.height - 11) / 100) * 2, ZIP_SCREEN_COMPONENTS.hardZip.minMeters);
+      const hardZipCost = hardZipMeters * ZIP_SCREEN_COMPONENTS.hardZip.pricePerMeter;
+      componentsTotal += hardZipCost;
+      componentsList.push({
+        name: ZIP_SCREEN_COMPONENTS.hardZip.name,
+        detail: `${hardZipMeters.toFixed(2)}μ × ${ZIP_SCREEN_COMPONENTS.hardZip.pricePerMeter}€/μ (ύψος-11cm×2, ελάχ. ${ZIP_SCREEN_COMPONENTS.hardZip.minMeters}μ)`,
+        cost: hardZipCost
+      });
+      
+      // 6. Αντίβαρο (πλάτος)
+      const counterweightMeters = Math.max(widthInMeters, ZIP_SCREEN_COMPONENTS.counterweight.minMeters);
+      const counterweightCost = counterweightMeters * ZIP_SCREEN_COMPONENTS.counterweight.pricePerMeter;
+      componentsTotal += counterweightCost;
+      componentsList.push({
+        name: ZIP_SCREEN_COMPONENTS.counterweight.name,
+        detail: `${counterweightMeters.toFixed(2)}μ × ${ZIP_SCREEN_COMPONENTS.counterweight.pricePerMeter}€/μ (ελάχ. ${ZIP_SCREEN_COMPONENTS.counterweight.minMeters}μ)`,
+        cost: counterweightCost
+      });
+      
+      // 7. Βέργα για βάρος (πλάτος - 20cm)
+      const rodMeters = Math.max(widthInMeters - 0.20, 0);
+      const rodCost = rodMeters * ZIP_SCREEN_COMPONENTS.rod.pricePerMeter;
+      componentsTotal += rodCost;
+      componentsList.push({
+        name: ZIP_SCREEN_COMPONENTS.rod.name,
+        detail: `${rodMeters.toFixed(2)}μ × ${ZIP_SCREEN_COMPONENTS.rod.pricePerMeter}€/μ (πλάτος-20cm)`,
+        cost: rodCost
+      });
+      
+      // 8. Μηχανισμός (χειροκίνητο ή μοτέρ)
+      const mechanismItems = config.hasMotor 
+        ? ZIP_SCREEN_COMPONENTS.mechanism.motor 
+        : ZIP_SCREEN_COMPONENTS.mechanism.manual;
+      
+      mechanismItems.forEach(item => {
+        const cost = item.price * item.quantity;
+        componentsTotal += cost;
+        componentsList.push({
+          name: item.name,
+          detail: `${item.quantity} ${item.unit} × ${item.price}€`,
+          cost
+        });
+      });
+      
+      // 9. Ύφασμα (σταθερή τιμή €22/m²)
+      const squareMeters = calculateZipScreenFabricSquareMeters(config.width, config.height);
+      const fabricCost = squareMeters * ZIP_SCREEN_COMPONENTS.fabric.pricePerSqm;
+      componentsTotal += fabricCost;
+      componentsList.push({
+        name: 'Ύφασμα Κάθετου',
+        detail: `${squareMeters.toFixed(2)}m² × ${ZIP_SCREEN_COMPONENTS.fabric.pricePerSqm}€/m² ((πλάτος+10cm)×(ύψος+20cm))`,
+        cost: fabricCost
+      });
+    }
+
+    // Βασική τιμή από πίνακα (μόνο αν ΔΕΝ είναι εξαρτήματα)
+    const basePrice = config.showComponents ? 0 : getPriceFromTable(ZIP_SCREEN_BASE_PRICES, roundedHeight, roundedWidth);
+    
+    if (!config.showComponents && basePrice === 0) {
       newErrors.push(`Οι διαστάσεις ${roundedWidth}cm × ${roundedHeight}cm δεν είναι διαθέσιμες`);
     }
 
-    // Μοτέρ +260€
-    const motorCost = config.hasMotor ? 260 : 0;
+    // Μοτέρ +260€ (μόνο σε έτοιμο σύστημα, στα εξαρτήματα είναι μέσα)
+    const motorCost = (!config.showComponents && config.hasMotor) ? 260 : 0;
 
-    const subtotal = basePrice + motorCost;
+    // Υπολογισμός συνόλων
+    const subtotal = config.showComponents ? componentsTotal : (basePrice + motorCost);
+
+    // Επιβάρυνση χρώματος +160€
     const colorSurchargeAmount = config.customColor ? 160 : 0;
     const subtotalWithoutVAT = subtotal + colorSurchargeAmount;
+
+    // ΦΠΑ 24%
     const vat = subtotalWithoutVAT * 0.24;
     const totalPrice = subtotalWithoutVAT + vat;
 
@@ -78,7 +195,8 @@ function ZipScreenConfig({ product, onSave }) {
       vat,
       totalPrice,
       roundedWidth,
-      roundedHeight
+      roundedHeight,
+      components: componentsList
     });
 
     setErrors(newErrors);
@@ -166,21 +284,72 @@ function ZipScreenConfig({ product, onSave }) {
             </div>
           </div>
 
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">Μοτέρ</h3>
+          {/* Toggle: Έτοιμο Σύστημα / Εξαρτήματα */}
+          <div className="mb-8 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg">
             <div className="flex items-center gap-3">
               <input
                 type="checkbox"
-                id="hasMotor"
-                checked={config.hasMotor}
-                onChange={(e) => handleChange('hasMotor', e.target.checked)}
+                id="showComponents"
+                checked={config.showComponents}
+                onChange={(e) => handleChange('showComponents', e.target.checked)}
                 className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <label htmlFor="hasMotor" className="text-sm text-gray-700">
-                Μοτέρ (+260€)
+              <label htmlFor="showComponents" className="flex items-center gap-2 text-sm font-semibold text-gray-800 cursor-pointer">
+                <Wrench className="w-5 h-5 text-amber-600" />
+                Κόστος Εξαρτημάτων (αγορά ανά τεμάχιο)
               </label>
             </div>
+            <p className="text-xs text-gray-600 mt-2 ml-8">
+              {config.showComponents 
+                ? '✓ Εμφάνιση αναλυτικού κόστους εξαρτημάτων'
+                : 'Τιμολόγηση έτοιμου συστήματος'
+              }
+            </p>
           </div>
+
+          {/* Μοτέρ (μόνο αν ΔΕΝ είναι εξαρτήματα) */}
+          {!config.showComponents && (
+            <div className="mb-8">
+              <h3 className="text-lg font-semibold text-gray-700 mb-4">Μοτέρ</h3>
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="hasMotor"
+                  checked={config.hasMotor}
+                  onChange={(e) => handleChange('hasMotor', e.target.checked)}
+                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="hasMotor" className="text-sm text-gray-700">
+                  Μοτέρ (+260€)
+                </label>
+              </div>
+            </div>
+          )}
+
+          {/* Μοτέρ/Χειροκίνητο (μόνο αν ΕΙΝ ΑΙ εξαρτήματα) */}
+          {config.showComponents && (
+            <div className="mb-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-700 mb-4">Τύπος Μηχανισμού</h3>
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="hasMotorComponents"
+                  checked={config.hasMotor}
+                  onChange={(e) => handleChange('hasMotor', e.target.checked)}
+                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="hasMotorComponents" className="text-sm text-gray-700">
+                  Μοτέρ (€260)
+                </label>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                {config.hasMotor 
+                  ? 'Με μοτέρ (περιλαμβάνει πλύμνη για μοτέρ €2.90)' 
+                  : 'Χειροκίνητο (περιλαμβάνει πλύμνη €8 + πειράκι €1.50)'
+                }
+              </p>
+            </div>
+          )}
 
           <div className="mb-8">
             <h3 className="text-lg font-semibold text-gray-700 mb-4">Χρώμα</h3>
@@ -223,21 +392,56 @@ function ZipScreenConfig({ product, onSave }) {
 
           <div className="border-t pt-6">
             <h3 className="text-lg font-semibold text-gray-700 mb-4">Ανάλυση Κόστους</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Βασική Τιμή ({calculations.roundedWidth} × {calculations.roundedHeight}cm):</span>
-                <span className="font-medium">€{calculations.basePrice.toFixed(2)}</span>
-              </div>
-              {config.hasMotor && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Μοτέρ:</span>
-                  <span className="font-medium">€{calculations.motorCost.toFixed(2)}</span>
+            
+            {config.showComponents && calculations.components ? (
+              /* Λίστα Εξαρτημάτων */
+              <div className="space-y-4 mb-6">
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Wrench className="w-5 h-5 text-amber-600" />
+                    <h4 className="font-semibold text-gray-800">Λίστα Εξαρτημάτων</h4>
+                  </div>
+                  <div className="space-y-2">
+                    {calculations.components.map((item, index) => (
+                      <div key={index} className="flex justify-between items-start text-sm border-b border-amber-100 pb-2 last:border-0 last:pb-0">
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-800">{item.name}</div>
+                          <div className="text-xs text-gray-600">{item.detail}</div>
+                        </div>
+                        <span className="font-semibold text-gray-900 ml-4">
+                          €{item.cost.toFixed(2)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex justify-between items-center pt-3 mt-3 border-t-2 border-amber-300">
+                    <span className="font-bold text-gray-800">Σύνολο Εξαρτημάτων:</span>
+                    <span className="font-bold text-amber-700">€{calculations.subtotal.toFixed(2)}</span>
+                  </div>
                 </div>
-              )}
-              <div className="flex justify-between pt-2 border-t">
-                <span className="text-gray-600">Υποσύνολο:</span>
-                <span className="font-medium">€{calculations.subtotal.toFixed(2)}</span>
               </div>
+            ) : (
+              /* Τιμολόγηση Έτοιμου Συστήματος */
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Βασική Τιμή ({calculations.roundedWidth} × {calculations.roundedHeight}cm):</span>
+                  <span className="font-medium">€{calculations.basePrice.toFixed(2)}</span>
+                </div>
+                {config.hasMotor && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Μοτέρ:</span>
+                    <span className="font-medium">€{calculations.motorCost.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between pt-2 border-t">
+                  <span className="text-gray-600">Υποσύνολο:</span>
+                  <span className="font-medium">€{calculations.subtotal.toFixed(2)}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Κοινό τμήμα (χρώμα + ΦΠΑ + τελική τιμή) */}
+            <div className="space-y-2 text-sm mt-4">
               {config.customColor && (
                 <div className="flex justify-between">
                   <span className="text-gray-600">Επιβάρυνση Χρώματος:</span>

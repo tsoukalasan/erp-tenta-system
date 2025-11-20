@@ -258,6 +258,160 @@ export const KASETINA_530_BASE_PRICES = {
   300: { 350: 1404, 400: 1516, 450: 1628, 500: 1742 }
 };
 
+// Εξαρτήματα Κασετίνα 530
+export const KASETINA_530_COMPONENTS = {
+  // Σταθερά εξαρτήματα (ανά κασέτα)
+  fixed: [
+    { name: 'Σετ Τάπες Αντιβάρου 530', price: 7, quantity: 1, unit: 'σετ' },
+    { name: 'Σετ Τάπες Προφίλ 530', price: 16, quantity: 1, unit: 'σετ' },
+    { name: 'Βάση Στήριξης Τοίχου/Μαρκίζας 530', price: 8, quantity: 2, unit: 'τεμ' },
+    { name: 'Σετ Βάσεις Τοιχου 530', price: 33, quantity: 1, unit: 'σετ' },
+    { name: 'Σετ Βάσεις Βραχίονα 530', price: 45, quantity: 1, unit: 'σετ' },
+    { name: 'Σετ Τερματικό Κλιπ 530', price: 11, quantity: 1, unit: 'σετ' }
+  ],
+  
+  // Προφίλ κασέτας (ανά μέτρο, ελάχιστη χρέωση 4μ)
+  profile: {
+    pricePerMeter: 85,
+    minMeters: 4
+  },
+  
+  // Μηχανισμός
+  mechanism: {
+    manual: { name: 'Μηχανισμός Μακριά Θηλειά', price: 12 },
+    motor: { name: 'Μοτέρ', price: 260 }
+  },
+  
+  // Βραχίονες (πάντα 1 ζευγάρι = 2 βραχίονες ανά κασέτα)
+  arms: {
+    160: { price: 112, foldedWidth: 100 },
+    180: { price: 114, foldedWidth: 105 },
+    200: { price: 120, foldedWidth: 120 },
+    220: { price: 123, foldedWidth: 132 },
+    250: { price: 125, foldedWidth: 150 },
+    275: { price: 165, foldedWidth: 160 },
+    300: { price: 168, foldedWidth: 175 }
+  },
+  
+  // Άξονας (ανά μέτρο)
+  axis: {
+    default: { name: 'Άξονας Φ70 Λούκι', pricePerMeter: 11 },
+    alternative: { name: 'Άξονας Φ78 Λούκι', pricePerMeter: 15 }
+  },
+  
+  // Μανιβέλες (μόνο για χειροκίνητο)
+  crank: {
+    150: { name: 'Μανιβέλα Σωληνωτή 150cm', price: 9.75 },
+    180: { name: 'Μανιβέλα Σωληνωτή 180cm', price: 10.0 },
+    200: { name: 'Μανιβέλα Σωληνωτή 200cm', price: 11.5 },
+    250: { name: 'Μανιβέλα Σωληνωτή 250cm', price: 14.0 }
+  },
+  
+  // Υφάσματα (τιμή ανά m² - οι τιμές είναι χοντρικής, πολλαπλασιάζονται x2 για λιανική)
+  fabrics: [
+    { id: 201, name: 'Para Acrylic', wholesalePrice: 10.00, company: 'Para' },
+    { id: 202, name: 'Para Stripes', wholesalePrice: 10.00, company: 'Para' },
+    { id: 203, name: 'Para Resinato', wholesalePrice: 12.10, company: 'Para' },
+    { id: 204, name: 'Para Starlight Blue', wholesalePrice: 15.00, company: 'Para' },
+    { id: 205, name: 'Para Malmoe Resinato', wholesalePrice: 14.00, company: 'Para' },
+    { id: 401, name: 'Dickson Acrylic', wholesalePrice: 10.10, company: 'Dickson' },
+    { id: 402, name: 'Dickson Acrylic Chinese Tweeds', wholesalePrice: 11.50, company: 'Dickson' },
+    { id: 403, name: 'Dickson Acrylic Piques', wholesalePrice: 11.50, company: 'Dickson' },
+    { id: 404, name: 'Dickson Acrylic Stripes', wholesalePrice: 11.50, company: 'Dickson' }
+  ]
+};
+
+// Helper: Υπολογισμός τετραγωνικών για Τέντα Κασέτα
+// Τύπος: (Πλάτος + 15cm) * (Προβολή + 40cm)
+export const calculateFabricSquareMeters = (widthCm, projectionCm) => {
+  const effectiveWidth = (widthCm + 15) / 100; // σε μέτρα
+  const effectiveProjection = (projectionCm + 40) / 100; // σε μέτρα
+  return effectiveWidth * effectiveProjection;
+};
+
+// Εξαρτήματα Zip Screen (Κάθετο Ζιπ)
+export const ZIP_SCREEN_COMPONENTS = {
+  // Κασονέτο (ανά μέτρο, εξαρτάται από πλάτος)
+  cassette: {
+    pricePerMeter: 32,
+    minMeters: 4,
+    formula: 'width' // μέτρα = πλάτος
+  },
+  
+  // Σταθερά εξαρτήματα (ανά ζιπ)
+  fixed: [
+    { name: 'Σετ Καπάκια Κασονέτου', price: 12, quantity: 1, unit: 'σετ' },
+    { name: 'Σπογγώδης Ταινία', price: 0.80, quantity: 2.5, unit: 'μ' },
+    { name: 'Τάπα Αντιβάρου', price: 1.5, quantity: 2, unit: 'τεμ' },
+    { name: 'Σετ Πλαστικά Οδηγού Ζιπ', price: 6, quantity: 2, unit: 'σετ' },
+    { name: 'Πλύμνη Για Κουζινέτο', price: 3, quantity: 1, unit: 'τεμ' }
+  ],
+  
+  // Άξονας (ανά μέτρο, εξαρτάται από πλάτος)
+  axis: {
+    name: 'Άξονας Φ70 Λούκι',
+    pricePerMeter: 11,
+    minMeters: 4,
+    formula: 'width'
+  },
+  
+  // Οδηγός (ανά μέτρο, εξαρτάται από ύψος)
+  guide: {
+    name: 'Οδηγός 2 Προφίλ',
+    pricePerMeter: 27,
+    minMeters: 5,
+    formula: '(height - 11) * 2' // cm → μέτρα
+  },
+  
+  // Σκληρό Πλαστικό Ζιπ (ανά μέτρο, εξαρτάται από ύψος)
+  hardZip: {
+    name: 'Σκληρό Πλαστικό Ζιπ',
+    pricePerMeter: 14,
+    minMeters: 5,
+    formula: '(height - 11) * 2'
+  },
+  
+  // Αντίβαρο (ανά μέτρο, εξαρτάται από πλάτος)
+  counterweight: {
+    name: 'Αντίβαρο Κάθετης',
+    pricePerMeter: 14.5,
+    minMeters: 4,
+    formula: 'width'
+  },
+  
+  // Βέργα για βάρος (ανά μέτρο, πλάτος - 20cm)
+  rod: {
+    name: 'Βέργα Για Βάρος',
+    pricePerMeter: 7,
+    formula: 'width - 0.20' // -20cm
+  },
+  
+  // Μηχανισμός (χειροκίνητο ή μοτέρ)
+  mechanism: {
+    manual: [
+      { name: 'Πλύμνη Για Μηχανισμό', price: 8, quantity: 1, unit: 'τεμ' },
+      { name: 'Πειράκι Κουνιζέτου', price: 1.5, quantity: 1, unit: 'τεμ' }
+    ],
+    motor: [
+      { name: 'Πλύμνη Για Μοτέρ', price: 2.9, quantity: 1, unit: 'τεμ' },
+      { name: 'Μοτέρ', price: 260, quantity: 1, unit: 'τεμ' }
+    ]
+  },
+  
+  // Ύφασμα - Σταθερή τιμή €22/m²
+  fabric: {
+    pricePerSqm: 22,
+    formula: '((width + 10) / 100) * ((height + 20) / 100)' // τετραγωνικά
+  }
+};
+
+// Helper: Υπολογισμός τετραγωνικών για Κάθετο Ζιπ
+export const calculateZipScreenFabricSquareMeters = (widthCm, heightCm) => {
+  const effectiveWidth = (widthCm + 10) / 100; // σε μέτρα
+  const effectiveHeight = (heightCm + 20) / 100; // σε μέτρα
+  return effectiveWidth * effectiveHeight;
+};
+
 // Κασέτα 732
 // Πλάτος: 350-700 (ανά 50cm), Προβολή: 180-300 (ανά 20-25cm)
 export const KASETA_732_BASE_PRICES = {

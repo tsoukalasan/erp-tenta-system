@@ -23,7 +23,7 @@ const AdminProductManager = () => {
       const { data, error } = await supabase
         .from('Κατηγορίες')
         .select('*')
-        .order('name');
+        .order('Name');
       
       if (error) throw error;
       setCategories(data || []);
@@ -79,22 +79,22 @@ const AdminProductManager = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-6 left-6 z-50">
       {!showForm ? (
         <button
           onClick={() => setShowForm(true)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full p-4 shadow-lg flex items-center gap-2 transition-all"
-          title="Προσθήκη Νέου Προϊόντος"
+          className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-5 py-3 shadow-lg flex items-center gap-2 transition-all hover:shadow-xl"
+          title="Προσθέστε Νέο Προϊόν"
         >
-          <Plus className="w-6 h-6" />
-          <span className="font-medium">Νέο Προϊόν</span>
+          <Plus className="w-5 h-5" />
+          <span className="font-semibold">Προσθέστε Προϊόν</span>
         </button>
       ) : (
         <div className="bg-white rounded-lg shadow-2xl p-6 w-96 border border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-              <Package className="w-5 h-5 text-indigo-600" />
-              Νέο Προϊόν
+              <Package className="w-5 h-5 text-blue-600" />
+              Προσθέστε Προϊόν
             </h3>
             <button
               onClick={() => {
@@ -154,7 +154,7 @@ const AdminProductManager = () => {
                 <option value="">Επιλέξτε κατηγορία</option>
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
-                    {cat.name}
+                    {cat.Name}
                   </option>
                 ))}
               </select>
@@ -167,10 +167,10 @@ const AdminProductManager = () => {
                 className={`flex-1 px-4 py-2 rounded-md font-medium text-white ${
                   loading 
                     ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-indigo-600 hover:bg-indigo-700'
+                    : 'bg-blue-600 hover:bg-blue-700'
                 }`}
               >
-                {loading ? 'Προσθήκη...' : 'Προσθήκη Προϊόντος'}
+                {loading ? 'Προσθήκη...' : 'Προσθήκη'}
               </button>
               <button
                 type="button"
